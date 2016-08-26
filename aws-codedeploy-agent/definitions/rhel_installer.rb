@@ -1,5 +1,5 @@
 # ~FC015
-define :manual_installer do
+define :rhel_installer do
   include_recipe 'ohai'
   include_recipe 'build-essential'
   include_recipe 'rbenv::default'
@@ -36,7 +36,7 @@ define :manual_installer do
 
   rbenv_gem 'aws-sdk-core' do
     ruby_version node['aws-codedeploy-agent']['ruby-version']
-    version '2.3.17'
+    #version '2.1.2'
   end
 
   link '/usr/bin/ruby2.0' do
@@ -59,6 +59,7 @@ define :manual_installer do
   end
 
   service 'codedeploy-agent' do
-    action [:enable, :start]
+    provider Chef::Provider::Service::Init
+    action [:start]
   end
 end
