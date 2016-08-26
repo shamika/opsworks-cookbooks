@@ -17,82 +17,59 @@
 # limitations under the License.
 #
 
-Chef::Log.info('Platform:' + node['platform'])
+Chef::Log.debug('Platform:' + node['platform'])
+Chef::Log.debug('Platform:' + node['platform_version'])
 
 case node['platform']
 when 'ubuntu'
   execute 'apt-get-update-periodic' do
     command 'apt-get update'
     ignore_failure true
-    only_if do
-      File.exist?('/var/lib/apt/periodic/update-success-stamp') &&
-      File.mtime('/var/lib/apt/periodic/update-success-stamp') < Time.now - 86400
+  end
+
+  case node['platform_version']
+  when '14.04'
+    %w(unzip rsync ruby2.0).each do |pkg|
+      package pkg
     end
+    ubuntu_installer
+  when '12.04'
+    %w(unzip rsync ruby).each do |pkg|
+      package pkg
+    end
+    manual_installer
   end
-  %w(unzip rsync ruby).each do |pkg|
-    package pkg
-  end
+
 when 'fedora'
   %w(unzip rsync ruby tar openssl-devel readline-devel zlib-devel).each do |pkg|
     package pkg
   end
+  manual_installer
+
+when 'centos'
+  %w(unzip rsync ruby tar openssl-devel readline-devel zlib-devel).each do |pkg|
+    package pkg
+  end
+  manual_installer
+
 when 'debian'
+  execute 'apt-get-update-periodic' do
+    command 'apt-get update'
+    ignore_failure true
+  end
   %w(unzip rsync ruby tar).each do |pkg|
     package pkg
   end
+  manual_installer
+
+when 'amazon'
+  %w(ruby aws-cli).each do |pkg|
+    package pkg
+  end
+  amazon_installer
 else
   %w(unzip rsync ruby tar openssl-devel readline-devel zlib-devel).each do |pkg|
     package pkg
   end
-end
-
-include_recipe 'ohai'
-include_recipe 'build-essential'
-include_recipe 'rbenv::default'
-include_recipe 'rbenv::ruby_build'
-
-ark 'download-codedeploy' do
-  url 'https://github.com/aws/aws-codedeploy-agent/archive/master.zip'
-  path '/opt'
-  action :put
-end
-
-link '/opt/codedeploy-agent' do
-  to '/opt/download-codedeploy'
-  not_if 'test -f /opt/codedeploy-agent'
-end
-
-file '/opt/codedeploy-agent/bin/codedeploy-agent' do
-  mode '0755'
-  owner 'root'
-  group 'root'
-end
-
-rbenv_ruby node['aws-codedeploy-agent']['ruby-version'] do
-  ruby_version node['aws-codedeploy-agent']['ruby-version']
-  global true
-end
-
-link '/usr/bin/ruby2.0' do
-  to '/opt/rbenv/versions/2.0.0-p645/bin/ruby'
-end
-
-link '/etc/init.d/codedeploy-agent' do
-  to '/opt/codedeploy-agent/init.d/codedeploy-agent'
-end
-
-%w(/opt/codedeploy-agent/deployment-root /etc/codedeploy-agent/conf).each do |dir|
-  directory dir do
-    action :create
-    recursive true
-  end
-end
-
-link '/etc/codedeploy-agent/conf/codedeployagent.yml' do
-  to '/opt/codedeploy-agent/conf/codedeployagent.yml'
-end
-
-service 'codedeploy-agent' do
-  provider Chef::Provider::Service::Init
-  action [:start]
+  manual_installer
 end

@@ -11,6 +11,7 @@ The following platforms are supported by this cookbook.
 * Ubuntu 14.04
 * CentOs 7 
 * Fedora 21
+* Debian 8 
 * Amazon Linux AMI 2015.03
 
 #### packages
@@ -58,7 +59,9 @@ Default .kitchen.yml test the cookbook in docker containers.
 To test the cookbook on AWS instances use:
 ```bash
 KITCHEN_YAML=.kitchen-aws.yml bundle exec kitchen list 
-KITCHEN_YAML=.kitchen-aws.yml bundle exec kitchen verify aws-codedeploy-agent-ubuntu-1404
+KITCHEN_YAML=.kitchen-aws.yml bundle exec kitchen verify aws-codedeploy-agent-ubuntu-1404-aws
+KITCHEN_YAML=.kitchen-aws.yml bundle exec kitchen verify aws-codedeploy-agent-ubuntu-1204-aws 
+KITCHEN_YAML=.kitchen-aws.yml bundle exec kitchen verify aws-codedeploy-agent-debian-8-aws 
 KITCHEN_YAML=.kitchen-aws.yml bundle exec kitchen verify aws-codedeploy-agent-amazon-linux
 ```
 
