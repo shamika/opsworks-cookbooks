@@ -1,5 +1,5 @@
 #
-# Copyright 2015-2016, Noah Kantrowitz
+# Copyright 2015, Noah Kantrowitz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -146,7 +146,7 @@ module PoisePython
         # Captured because #options conflicts with Chef::Resource::Package#options.
         wheel_version = options[:wheel_version]
         return unless wheel_version
-        Chef::Log.debug("[#{new_resource}] Installing wheel #{wheel_version == true ? 'latest' : wheel_version}")
+        Chef::Log.debug("[#{new_resource}] Installing setuptools #{wheel_version == true ? 'latest' : wheel_version}")
         # Install wheel via pip.
         python_package 'wheel' do
           parent_python new_resource
@@ -162,7 +162,7 @@ module PoisePython
         virtualenv_version = options[:virtualenv_version]
         return unless virtualenv_version
         # Check if the venv module exists.
-        cmd = poise_shell_out([python_binary, '-m', 'venv', '-h'], environment: python_environment)
+        cmd = shell_out([python_binary, '-m', 'venv', '-h'], environment: python_environment)
         return unless cmd.error?
         Chef::Log.debug("[#{new_resource}] Installing virtualenv #{virtualenv_version == true ? 'latest' : virtualenv_version}")
         # Install virtualenv via pip.

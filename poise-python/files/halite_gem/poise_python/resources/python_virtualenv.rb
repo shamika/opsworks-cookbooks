@@ -1,5 +1,5 @@
 #
-# Copyright 2015-2016, Noah Kantrowitz
+# Copyright 2015, Noah Kantrowitz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -98,11 +98,7 @@ module PoisePython
         alias_method :action_delete, :action_uninstall
 
         def python_binary
-          if node.platform_family?('windows')
-            ::File.join(new_resource.path, 'Scripts', 'python.exe')
-          else
-            ::File.join(new_resource.path, 'bin', 'python')
-          end
+          ::File.join(new_resource.path, 'bin', 'python')
         end
 
         def python_environment

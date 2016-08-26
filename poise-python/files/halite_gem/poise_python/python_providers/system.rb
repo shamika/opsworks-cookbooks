@@ -1,5 +1,5 @@
 #
-# Copyright 2015-2016, Noah Kantrowitz
+# Copyright 2015, Noah Kantrowitz
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,15 +33,14 @@ module PoisePython
           '~> 6.0' => %w{python3.1 python2.6 python2.5},
         },
         ubuntu: {
-          '16.04' => %w{python3.5 python2.7},
           '14.04' => %w{python3.4 python2.7},
           '12.04' => %w{python3.2 python2.7},
           '10.04' => %w{python3.1 python2.6},
         },
-        redhat: {default: %w{python}},
+        rhel: {default: %w{python}},
         centos: {default: %w{python}},
         fedora: {default: %w{python3 python}},
-        amazon: {default: %w{python34 python27 python26 python}},
+        amazon: {default: %w{python27 python26 python}},
       })
 
       # Output value for the Python binary we are installing. Seems to match

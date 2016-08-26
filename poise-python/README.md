@@ -32,15 +32,9 @@ pip_requirements '/opt/myapp/requirements.txt'
 This cookbook can install at least Python 2.7, Python 3, and PyPy on all
 supported platforms (Debian, Ubuntu, RHEL, CentOS, Fedora).
 
-### Windows Support
-
-The latest version of `poise-python` includes basic support for managing Python
-on Windows. This currently doesn't support Python 3.5, but everything should be
-working. Consider this support tested but experimental at this time.
-
 ## Requirements
 
-Chef 12.1 or newer is required.
+Chef 12 or newer is required.
 
 ## Attributes
 
@@ -224,9 +218,6 @@ The `:purge` and `:reconfigure` actions are not supported.
 * `user` – System user to install the package.
 * `virtualenv` – Name of the `python_virtualenv` resource to use. This is
   mutually exclusive with the `python` property.
-* `options` – Options to pass to `pip`.
-* `install_options` – Options to pass to `pip install` (and similar commands).
-* `list_options` – Options to pass to `pip list` (and similar commands).
 
 For other properties see the [Chef documentation](https://docs.chef.io/resource_package.html#attributes).
 The `response_file`, `response_file_variables`, and `source` properties are not
@@ -286,10 +277,7 @@ notifications will only be triggered if a package is actually installed.
 
 * `path` – Path to the requirements file, or a folder containing the
   requirements file. *(name property)*
-* `cwd` – Directory to run `pip` from. *(default: directory containing the
-  `requirements.txt`)*
 * `group` – System group to install the packages.
-* `options` – Command line options for use with `pip install`.
 * `python` – Name of the `python_runtime` resource to use. If not specified, the
   most recently declared `python_runtime` will be used. Can also be set to the
   full path to a `python` binary.
@@ -337,7 +325,7 @@ end
 The `scl` provider installs Python using the [Software Collections](https://www.softwarecollections.org/)
 packages. This is only available on RHEL, CentOS, and Fedora. SCL offers more
 recent versions of Python than the system packages for the most part. If an SCL
-package exists for the requested version, it will be used in preference to the
+package exists for the requests version, it will be used in preference to the
 `system` provider.
 
 ```ruby
@@ -409,7 +397,7 @@ The Poise test server infrastructure is sponsored by [Rackspace](https://rackspa
 
 ## License
 
-Copyright 2015-2016, Noah Kantrowitz
+Copyright 2015, Noah Kantrowitz
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
