@@ -100,14 +100,6 @@ EOH
         #   System group to install the package.
         #   @return [String, Integer, nil]
         attribute(:group, kind_of: [String, Integer, NilClass])
-        # @!attribute install_options
-        #   Options string to be used with `pip install`.
-        #   @return [String, nil, false]
-        attribute(:install_options, kind_of: [String, NilClass, FalseClass], default: nil)
-        # @!attribute list_options
-        #   Options string to be used with `pip list`.
-        #   @return [String, nil, false]
-        attribute(:list_options, kind_of: [String, NilClass, FalseClass], default: nil)
         # @!attribute user
         #   System user to install the package.
         #   @return [String, Integer, nil]
@@ -171,7 +163,7 @@ EOH
         def check_package_versions(resource, version=new_resource.version)
           version_data = Hash.new {|hash, key| hash[key] = {current: nil, candidate: nil} }
           # Get the version for everything currently installed.
-          list = pip_command('list', :list).stdout
+          list = pip_command('list').stdout
           parse_pip_list(list).each do |name, current|
             # Merge current versions in to the data.
             version_data[name][:current] = current
@@ -224,7 +216,7 @@ EOH
         # @param version [String, Array<String>] Version(s) of package(s).
         # @return [void]
         def remove_package(name, version)
-          pip_command('uninstall', :install, %w{--yes} + [name].flatten)
+          pip_command('uninstall', %w{--yes} + [name].flatten)
         end
 
         private
@@ -259,18 +251,15 @@ EOH
         # Run a pip command.
         #
         # @param pip_command [String, nil] The pip subcommand to run (eg. install).
-        # @param options_type [Symbol] Either `:install` to `:list` to select
-        #   which extra options to use.
         # @param pip_options [Array<String>] Options for the pip command.
         # @param opts [Hash] Mixlib::ShellOut options.
         # @return [Mixlib::ShellOut]
-        def pip_command(pip_command, options_type, pip_options=[], opts={})
+        def pip_command(pip_command, pip_options=[], opts={})
           runner = opts.delete(:pip_runner) || %w{-m pip.__main__}
-          type_specific_options = new_resource.send(:"#{options_type}_options")
-          full_cmd = if new_resource.options || type_specific_options
+          full_cmd = if new_resource.options
             # We have to use a string for this case to be safe because the
             # options are a string and I don't want to try and parse that.
-            "#{runner.join(' ')} #{pip_command} #{new_resource.options} #{type_specific_options} #{Shellwords.join(pip_options)}"
+            "#{runner.join(' ')} #{pip_command} #{new_resource.options} #{Shellwords.join(pip_options)}"
           else
             # No special options, use an array to skip the extra /bin/sh.
             runner + (pip_command ? [pip_command] : []) + pip_options
@@ -293,7 +282,7 @@ EOH
           cmd = pip_requirements(name, version)
           # Prepend --upgrade if needed.
           cmd = %w{--upgrade} + cmd if upgrade
-          pip_command('install', :install, cmd)
+          pip_command('install', cmd)
         end
 
         # Run my hacked version of `pip list --outdated` with a specific set of
@@ -303,7 +292,7 @@ EOH
         # @param requirements [Array<String>] Pip-formatted package requirements.
         # @return [Mixlib::ShellOut]
         def pip_outdated(requirements)
-          pip_command(nil, :list, requirements, input: PIP_HACK_SCRIPT, pip_runner: %w{-})
+          pip_command(nil, requirements, input: PIP_HACK_SCRIPT, pip_runner: %w{-})
         end
 
         # Parse the output from `pip list`. Returns a hash of package key to

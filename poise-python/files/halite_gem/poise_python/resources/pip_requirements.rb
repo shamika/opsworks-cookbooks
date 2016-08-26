@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-require 'shellwords'
-
 require 'chef/provider'
 require 'chef/resource'
 require 'poise'
@@ -46,36 +44,14 @@ module PoisePython
         #   requirements file.
         #   @return [String]
         attribute(:path, kind_of: String, name_attribute: true)
-        # @!attribute cwd
-        #   Directory to run pip from. Defaults to the folder containing the
-        #   requirements.txt.
-        #   @return [String]
-        attribute(:cwd, kind_of: String, default: lazy { default_cwd })
         # @!attribute group
         #   System group to install the package.
         #   @return [String, Integer, nil]
         attribute(:group, kind_of: [String, Integer, NilClass])
-        # @!attribute options
-        #   Options string to be used with `pip install`.
-        #   @return [String, nil, false]
-        attribute(:options, kind_of: [String, NilClass, FalseClass])
         # @!attribute user
         #   System user to install the package.
         #   @return [String, Integer, nil]
         attribute(:user, kind_of: [String, Integer, NilClass])
-
-        private
-
-        # Default value for the {#cwd} property.
-        #
-        # @return [String]
-        def default_cwd
-          if ::File.directory?(path)
-            path
-          else
-            ::File.dirname(path)
-          end
-        end
       end
 
       # The default provider for `pip_requirements`.
@@ -108,20 +84,11 @@ module PoisePython
         # @param upgrade [Boolean] If we should use the --upgrade flag.
         # @return [void]
         def install_requirements(upgrade: false)
-          if new_resource.options
-            # Use a string because we have some options.
-            cmd = '-m pip.__main__ install'
-            cmd << ' --upgrade' if upgrade
-            cmd << " #{new_resource.options}"
-            cmd << " --requirement #{Shellwords.escape(requirements_path)}"
-          else
-            # No options, use an array to be slightly faster.
-            cmd = %w{-m pip.__main__ install}
-            cmd << '--upgrade' if upgrade
-            cmd << '--requirement'
-            cmd << requirements_path
-          end
-          output = python_shell_out!(cmd, user: new_resource.user, group: new_resource.group, cwd: new_resource.cwd).stdout
+          cmd = %w{-m pip.__main__ install}
+          cmd << '--upgrade' if upgrade
+          cmd << '--requirement'
+          cmd << requirements_path
+          output = python_shell_out!(cmd, user: new_resource.user, group: new_resource.group).stdout
           if output.include?('Successfully installed')
             new_resource.updated_by_last_action(true)
           end
